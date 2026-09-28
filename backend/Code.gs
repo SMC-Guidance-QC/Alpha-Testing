@@ -170,6 +170,7 @@ function doPost(e) {
             case 'listRoutine': return ok(handleListRoutine(requireAuth(session)));
             case 'listSchedules': return ok(handleListSchedules(requireAuth(session)));
             case 'saveRoutine': return ok(handleSaveRoutine(requireAuth(session), payload));
+            case 'saveRoutineBulk': return ok(handleSaveRoutineBulk(requireAuth(session), payload));
             case 'chatPoll': return ok(handleChatPoll(requireAuth(session)));
             case 'getThread': return ok(handleGetThread(requireAuth(session), payload));
             case 'sendMessage': return ok(handleSendMessage(requireAuth(session), payload));
@@ -472,6 +473,27 @@ function handleSaveRoutine(session, p) {
     sh.appendRow([lrn, status, date, notes, dropout, session.username || '', now]);
     return { lrn: lrn, status: status, date: date, notes: notes, dropout: dropout };
 }
+function handleSaveRoutineBulk(session, p) {
+    var updates = p && p.updates;
+    if (!Array.isArray(updates) || !updates.length) throw httpError('Select at least one student.', 'BAD_REQUEST');
+    if (updates.length > 500) throw httpError('A maximum of 500 students can be updated at once.', 'BAD_REQUEST');
+    var lock = LockService.getScriptLock(); lock.waitLock(20000);
+    try {
+        var sh = routineSheet(), values = sh.getDataRange().getValues(), rows = values.slice(1), byLrn = {};
+        for (var i=0;i<rows.length;i++) { var key=String(rows[i][0]||'').trim(); if(key) byLrn[key]=i; }
+        var now = new Date().toISOString(), changed=[];
+        updates.forEach(function(u){
+            var lrn=String(u&&u.lrn||'').trim().slice(0,40); if(!lrn)return;
+            var status=String(u.status||'Pending').trim(); if(['Pending','Scheduled','Done'].indexOf(status)<0)status='Pending';
+            var date=String(u.date||'').trim().slice(0,20), notes=String(u.notes==null?'':u.notes).slice(0,2000), dropout=u.dropout===true;
+            var row=[lrn,status,date,notes,dropout,session.username||'',now];
+            if(byLrn[lrn]!=null)rows[byLrn[lrn]]=row;else{byLrn[lrn]=rows.length;rows.push(row);} changed.push(lrn);
+        });
+        if(rows.length)sh.getRange(2,1,rows.length,7).setValues(rows);
+        return {updated:changed.length,lrns:changed};
+    } finally { lock.releaseLock(); }
+}
+
 var SCHEDULE_HEADERS = ['id','type','label','full','grade','gnum','adviser','section','gridJson'];
 function scheduleSheet() { return sheetOrCreate('Schedules', SCHEDULE_HEADERS); }
 function handleListSchedules(session) {

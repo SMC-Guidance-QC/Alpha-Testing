@@ -249,3 +249,43 @@ html,body,button,input,select,textarea{font-family:'Outfit',system-ui,-apple-sys
 .wni-alpha div span{margin-top:4px;font-size:13px;line-height:1.5}
 .wni-major .wni-list{gap:11px;margin-bottom:18px}
 @media(max-width:560px){.wni-box.wni-major{width:100%}.wni-major .wni-title{font-size:27px}.wni-alpha{padding:14px;gap:9px}.wni-alpha strong{font-size:15px}.wni-alpha div span{font-size:12.5px}}
+
+/* Routine Interviews multi-select status toolbar. */
+.ri-bulk{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0;padding:10px 12px;border:1px solid var(--line);border-radius:11px;background:var(--paper)}
+.ri-bulk-check{display:inline-flex;align-items:center;gap:7px;min-height:40px;font-weight:650;color:var(--ink)}
+.ri-bulk input[type="checkbox"],.ri-row-check,#riHeadSelect{width:18px;height:18px;accent-color:var(--navy);cursor:pointer}
+.ri-bulk-count{min-width:76px;color:var(--mist);font-size:12px;font-weight:700}
+.ri-bulk select,.ri-bulk button{min-height:40px;border-radius:8px}
+.ri-pick{width:38px;text-align:center}
+:root[data-theme="dark"] .ri-bulk{background:#111c31;border-color:#354969}
+@media(max-width:600px){.ri-bulk{align-items:stretch}.ri-bulk-check,.ri-bulk-count{align-self:center}.ri-bulk select{flex:1 1 150px}.ri-bulk button{flex:1 1 130px}}
+
+/* Minimal moving ambience: decorative, slow, and kept behind every control. */
+#appScreen::after{content:"";position:fixed;inset:72px 0 0;z-index:0;pointer-events:none;background-repeat:no-repeat;will-change:transform,opacity}
+:root[data-theme="sakura"] #appScreen::after{background:radial-gradient(ellipse 9px 5px at 14% 8%,rgba(190,86,120,.16),transparent 75%),radial-gradient(ellipse 8px 5px at 48% 25%,rgba(220,139,162,.15),transparent 75%),radial-gradient(ellipse 10px 6px at 76% 5%,rgba(204,111,140,.14),transparent 75%),radial-gradient(ellipse 7px 4px at 92% 36%,rgba(220,139,162,.13),transparent 75%);animation:sakuraDrift 22s linear infinite}
+:root[data-theme="sage"] #appScreen::after{background:radial-gradient(ellipse 18px 7px at 18% 78%,rgba(67,112,92,.10),transparent 75%),radial-gradient(ellipse 16px 6px at 74% 52%,rgba(87,132,105,.09),transparent 75%),radial-gradient(ellipse 14px 6px at 90% 18%,rgba(67,112,92,.08),transparent 75%);animation:sageDrift 25s ease-in-out infinite alternate}
+:root[data-theme="wood"] #appScreen::before{animation:woodBreathe 28s ease-in-out infinite alternate;transform-origin:96% 18%}
+:root[data-theme="dark"] #appScreen::before{animation:ambientPulse 24s ease-in-out infinite alternate}
+:root[data-theme="light"] #appScreen::before{animation:lightDrift 26s ease-in-out infinite alternate}
+@keyframes sakuraDrift{0%{transform:translate3d(0,-3%,0) rotate(0deg)}50%{transform:translate3d(-1.5%,8%,0) rotate(2deg)}100%{transform:translate3d(1%,18%,0) rotate(-2deg)}}
+@keyframes sageDrift{from{transform:translate3d(-.8%,1%,0) rotate(-.5deg)}to{transform:translate3d(1.2%,-2%,0) rotate(1deg)}}
+@keyframes woodBreathe{from{transform:scale(1);opacity:.82}to{transform:scale(1.012);opacity:1}}
+@keyframes ambientPulse{from{opacity:.72;transform:translate3d(0,0,0)}to{opacity:1;transform:translate3d(-.5%,.5%,0)}}
+@keyframes lightDrift{from{transform:translate3d(0,0,0)}to{transform:translate3d(-.7%,.5%,0)}}
+@media(max-width:768px){#appScreen::after{inset:58px 0 0}}
+@media(prefers-reduced-motion:reduce){#appScreen::before,#appScreen::after{animation:none!important;transform:none!important}}
+@media print{#appScreen::after{display:none!important}}
+
+/* Tour geometry is viewport-based and never larger than the screen. */
+.tour-hole,.tour-pop{position:fixed!important}
+.tour-pop{width:min(300px,calc(100vw - 24px))!important;max-height:calc(100vh - 24px);overflow:auto}
+
+/* More visible theme motion, with a saved Settings opt-out. */
+.set-animation-row{margin:14px 0;padding:13px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+html[data-animations="off"] #appScreen::before,html[data-animations="off"] #appScreen::after{animation:none!important;transform:none!important}
+html[data-animations="off"] #appScreen::after{display:none!important}
+:root[data-theme="sakura"] #appScreen::after{opacity:1;background:radial-gradient(ellipse 13px 8px at 14% 8%,rgba(190,86,120,.32),transparent 74%),radial-gradient(ellipse 11px 7px at 48% 25%,rgba(220,139,162,.30),transparent 74%),radial-gradient(ellipse 14px 8px at 76% 5%,rgba(204,111,140,.27),transparent 74%),radial-gradient(ellipse 10px 6px at 92% 36%,rgba(220,139,162,.27),transparent 74%),radial-gradient(ellipse 12px 7px at 31% 52%,rgba(190,86,120,.22),transparent 74%),radial-gradient(ellipse 9px 6px at 65% 68%,rgba(220,139,162,.24),transparent 74%);animation-duration:16s}
+:root[data-theme="sage"] #appScreen::after{opacity:1;background:radial-gradient(ellipse 25px 10px at 18% 78%,rgba(67,112,92,.19),transparent 74%),radial-gradient(ellipse 23px 9px at 74% 52%,rgba(87,132,105,.18),transparent 74%),radial-gradient(ellipse 20px 8px at 90% 18%,rgba(67,112,92,.16),transparent 74%),radial-gradient(ellipse 18px 7px at 42% 30%,rgba(87,132,105,.13),transparent 74%);animation-duration:18s}
+:root[data-theme="wood"] #appScreen::before{animation-duration:18s;filter:saturate(1.15)}
+:root[data-theme="dark"] #appScreen::before,:root[data-theme="light"] #appScreen::before{animation-duration:18s}
+@media(prefers-reduced-motion:reduce){#appScreen::after{display:none!important}}

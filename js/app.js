@@ -557,7 +557,7 @@ SMC.app = (function () {
         inp.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
         document.addEventListener('click', function (e) { if (e.target !== inp && !box.contains(e.target)) close(); });
     }
-    var wnOpen = null, wnIntroOpen = null, tourSeenKey = 'smc-design-tour-required-2026-09-r3-evaluations', tourRequired = false;
+    var wnOpen = null, wnIntroOpen = null, tourSeenKey = 'smc-design-tour-required-2026-09-r4-welcome-animations', tourRequired = false;
     function setupWhatsNew() {
         var ov = document.getElementById('tour');
         var intro = document.getElementById('wnIntro');
@@ -567,23 +567,22 @@ SMC.app = (function () {
         var icE = document.getElementById('tourIc');
         var tE = document.getElementById('tourT');
         var dE = document.getElementById('tourD');
-        var dots = document.getElementById('tourDots');
         var back = document.getElementById('tourBack');
         var next = document.getElementById('tourNext');
         var xB = document.getElementById('tourX');
         if (!hole || !pop || !back || !next) return;
         var steps = [
             { sel: '#navEval', ic: '1', t: 'Teachers Evaluation tab', d: 'Open Teachers Evaluation from the main taskbar. This workspace contains both online and paper-based evaluation tools.', nav: true },
-            { sel: '#evalHub', ic: '2', t: 'Evaluation tool hub', d: 'The landing page separates each workflow so you can focus on one task at a time.', view: 'evaluations', evalHome: true },
+            { sel: '.eval-hub-hero', ic: '2', t: 'Evaluation tool hub', d: 'The landing page separates each workflow so you can focus on one task at a time.', view: 'evaluations', evalHome: true },
             { sel: '[data-eval-open="workbooks"]', ic: '3', t: 'Online evaluation workbooks', d: 'Use this tool for Google Forms and Drive folders. Preview sources, build grade-level workbooks, and reopen completed files.', view: 'evaluations', evalHome: true },
             { sel: '[data-eval-open="k2"]', ic: '4', t: 'Kinder–Grade 2 paper encoder', d: 'Use this tool to encode paper responses in one batch, then create the compiled PDF and result workbook.', view: 'evaluations', evalHome: true },
             { sel: '.eval-hub-steps', ic: '5', t: 'Follow the evaluation workflow', d: 'Choose the correct tool, review every entry, then open the completed files from Google Drive.', view: 'evaluations', evalHome: true },
-            { sel: '#exCard', ic: '6', t: 'Workbooks workspace', d: 'Select a teacher folder, preview the detected forms, diagnose missing sources, and build the evaluation workbooks.', view: 'evaluations', evalTool: 'workbooks' },
+            { sel: '.ex-head', ic: '6', t: 'Workbooks workspace', d: 'Select a teacher folder, preview the detected forms, diagnose missing sources, and build the evaluation workbooks.', view: 'evaluations', evalTool: 'workbooks' },
             { sel: '#exBatch', ic: '7', t: 'Choose a teacher folder', d: 'Pick one teacher at a time for large folders. This keeps each build focused and easier to verify.', view: 'evaluations', evalTool: 'workbooks' },
-            { sel: '#exSaved', ic: '8', t: 'Generated Evaluations', d: 'Completed workbooks appear here as dropdowns grouped by teacher. Expand a teacher to preview, download, or open the Drive folder.', view: 'evaluations', evalTool: 'workbooks' },
-            { sel: '#k2Card', ic: '9', t: 'K2 Paper Evaluation workspace', d: 'The paper encoder keeps one teacher, subject, and school year together as a single batch.', view: 'evaluations', evalTool: 'k2' },
+            { sel: '.ex-saved-head', ic: '8', t: 'Generated Evaluations', d: 'Completed workbooks appear here as dropdowns grouped by teacher. Expand a teacher to preview, download, or open the Drive folder.', view: 'evaluations', evalTool: 'workbooks' },
+            { sel: '.k2-head', ic: '9', t: 'K2 Paper Evaluation workspace', d: 'The paper encoder keeps one teacher, subject, and school year together as a single batch.', view: 'evaluations', evalTool: 'k2' },
             { sel: '.k2-common', ic: '10', t: 'Enter the shared batch details', d: 'Type the teacher as SURNAME, FIRST NAME, then enter the subject and numeric school year. These details apply to every staged paper.', view: 'evaluations', evalTool: 'k2' },
-            { sel: '.k2-paper', ic: '11', t: 'Encode each answered paper', d: 'Enter the optional class number, student name, grade level, ratings, and comment exactly as written on the paper form.', view: 'evaluations', evalTool: 'k2' },
+            { sel: '.k2-paper-fields', ic: '11', t: 'Encode each answered paper', d: 'Enter the optional class number, student name, grade level, ratings, and comment exactly as written on the paper form.', view: 'evaluations', evalTool: 'k2' },
             { sel: '#k2Batch', ic: '12', t: 'Save and create the outputs', d: 'Add papers to the batch, save the complete batch, preview the compiled PDF, and build the result template.', view: 'evaluations', evalTool: 'k2' },
             { sel: '#profileBtn', ic: '13', t: 'Personalise the website', d: 'Open your profile menu to reach Settings and the appearance controls.', nav: true },
             { sel: '#pmSettings', ic: '14', t: 'Open Settings', d: 'Choose Settings from the profile menu whenever you want to change the website theme.', profile: true, nav: true },
@@ -617,31 +616,32 @@ SMC.app = (function () {
         function place() {
             var step = steps[i];
             icE.textContent = step.ic; tE.textContent = step.t; dE.textContent = step.d;
-            dots.innerHTML = steps.map(function (_, k) { return '<span class="wn-dot' + (k === i ? ' on' : '') + '"></span>'; }).join('');
             back.style.visibility = i === 0 ? 'hidden' : 'visible';
             next.textContent = i === steps.length - 1 ? 'Done' : 'Next';
-            var el = step.sel ? document.querySelector(step.sel) : null;
-            var rect = el ? el.getBoundingClientRect() : null;
-            if (el && rect && rect.width > 0 && rect.height > 0 && (rect.top < 76 || rect.bottom > window.innerHeight - 18)) {
-                try { el.scrollIntoView({ block: rect.height > window.innerHeight * 0.72 ? 'start' : 'center', inline: 'nearest' }); } catch (e) {}
-                rect = el.getBoundingClientRect();
-            }
-            var pw = Math.min(300, window.innerWidth - 24);
-            if (rect && rect.width > 0 && rect.height > 0) {
-                var pad = 8;
-                hole.style.display = 'block';
-                hole.style.top = (rect.top - pad) + 'px'; hole.style.left = (rect.left - pad) + 'px';
-                hole.style.width = (rect.width + pad * 2) + 'px'; hole.style.height = (rect.height + pad * 2) + 'px';
-                var ph = pop.offsetHeight || 190;
-                var top = rect.bottom + 14, left = rect.left;
-                if (top + ph > window.innerHeight - 10) top = rect.top - ph - 14;
-                if (top < 10) top = 10;
-                left = Math.max(12, Math.min(left, window.innerWidth - pw - 12));
-                pop.style.top = top + 'px'; pop.style.left = left + 'px';
+            var selector = window.innerWidth <= 768 && step.mobileSel ? step.mobileSel : step.sel;
+            var el = selector ? document.querySelector(selector) : null;
+            if (el) { try { el.scrollIntoView({block:'center',inline:'nearest'}); } catch(e) {} }
+            var r = el ? el.getBoundingClientRect() : null, vw=window.innerWidth, vh=window.innerHeight, gap=14, edge=12;
+            pop.style.width = Math.min(300, vw-24) + 'px';
+            var ph=Math.min(pop.scrollHeight||200,vh-24), pw=Math.min(300,vw-24);
+            if (r && r.width>0 && r.height>0) {
+                var left=Math.max(8,r.left-8), top=Math.max(8,r.top-8), right=Math.min(vw-8,r.right+8), bottom=Math.min(vh-8,r.bottom+8);
+                /* Cap very large highlights to the visible, useful region. */
+                if (right-left>Math.min(720,vw-16)) right=left+Math.min(720,vw-16);
+                if (bottom-top>Math.min(360,vh-24)) bottom=top+Math.min(360,vh-24);
+                hole.style.display='block'; hole.style.left=left+'px'; hole.style.top=top+'px'; hole.style.width=(right-left)+'px'; hole.style.height=(bottom-top)+'px';
+                var candidates=[
+                    {l:right+gap,t:Math.max(edge,Math.min(top,vh-ph-edge))},
+                    {l:left-pw-gap,t:Math.max(edge,Math.min(top,vh-ph-edge))},
+                    {l:Math.max(edge,Math.min(left,vw-pw-edge)),t:bottom+gap},
+                    {l:Math.max(edge,Math.min(left,vw-pw-edge)),t:top-ph-gap}
+                ];
+                var pick=null;
+                for(var c=0;c<candidates.length;c++){var q=candidates[c];if(q.l>=edge&&q.t>=edge&&q.l+pw<=vw-edge&&q.t+ph<=vh-edge){pick=q;break;}}
+                if(!pick){ var below=vh-bottom, above=top, rightSpace=vw-right, leftSpace=left; var max=Math.max(below,above,rightSpace,leftSpace); pick=max===below?candidates[2]:max===above?candidates[3]:max===rightSpace?candidates[0]:candidates[1]; }
+                pop.style.left=Math.max(edge,Math.min(pick.l,vw-pw-edge))+'px'; pop.style.top=Math.max(edge,Math.min(pick.t,vh-ph-edge))+'px';
             } else {
-                hole.style.display = 'none';
-                pop.style.top = Math.max(10, (window.innerHeight - (pop.offsetHeight || 200)) / 2) + 'px';
-                pop.style.left = Math.max(12, (window.innerWidth - pw) / 2) + 'px';
+                hole.style.display='none'; pop.style.left=Math.max(edge,(vw-pw)/2)+'px'; pop.style.top=Math.max(edge,(vh-ph)/2)+'px';
             }
         }
         function render() { prepare(steps[i]); setTimeout(place, steps[i].settings || steps[i].profile || steps[i].view || steps[i].evalTool ? 240 : 30); }
@@ -649,12 +649,12 @@ SMC.app = (function () {
             if (tourRequired && !completed) return;
             ov.classList.remove('on'); ov.setAttribute('aria-hidden', 'true'); closeProfile();
             var sm = document.getElementById('settingsModal'); if (sm && sm.classList.contains('on') && SMC.settings && SMC.settings.close) SMC.settings.close();
-            markSeen(); window.removeEventListener('resize', place);
+            markSeen(); window.removeEventListener('resize', place); window.removeEventListener('scroll', place, true);
         }
         back.addEventListener('click', function () { if (i > 0) { i--; render(); } });
         next.addEventListener('click', function () { if (i < steps.length - 1) { i++; render(); } else closeTour(true); });
         if (xB) xB.addEventListener('click', function () { closeTour(false); });
-        wnOpen = function (required) { tourRequired = !!required; ov.classList.toggle('required', tourRequired); if (xB) xB.hidden = tourRequired; i = 0; ov.classList.add('on'); ov.setAttribute('aria-hidden', 'false'); render(); window.addEventListener('resize', place); };
+        wnOpen = function (required) { tourRequired = !!required; ov.classList.toggle('required', tourRequired); if (xB) xB.hidden = tourRequired; i = 0; ov.classList.add('on'); ov.setAttribute('aria-hidden', 'false'); render(); window.addEventListener('resize', place); window.addEventListener('scroll', place, true); };
         function closeIntro(seen) { if (tourRequired && seen) return; intro.classList.remove('on'); intro.setAttribute('aria-hidden', 'true'); if (seen) markSeen(); }
         wnIntroOpen = function (required) { tourRequired = !!required; intro.classList.toggle('required', tourRequired); if (introX) introX.hidden = tourRequired; if (introSkip) introSkip.hidden = tourRequired; if (introStart) introStart.textContent = tourRequired ? 'Continue to required tour' : 'Show me around'; intro.classList.add('on'); intro.setAttribute('aria-hidden', 'false'); };
         var introX = document.getElementById('wnIntroX');
@@ -666,7 +666,7 @@ SMC.app = (function () {
         intro.addEventListener('click', function (e) { if (e.target === intro && !tourRequired) closeIntro(true); });
     }
     function maybeShowWhatsNew() {
-        var key = 'smc-design-tour-required-2026-09-r3-evaluations';
+        var key = 'smc-design-tour-required-2026-09-r4-welcome-animations';
         try { if (user && user.username) key += '-' + String(user.username).toLowerCase(); } catch (e) {}
         tourSeenKey = key;
         try { if (localStorage.getItem(key)) return; } catch (e) {}

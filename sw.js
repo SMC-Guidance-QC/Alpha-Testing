@@ -1,6 +1,6 @@
 /* SMC Guidance Center - service worker (PWA app shell) */
 "use strict";
-var CACHE = 'smc-alpha-larger-welcome-full-evaluation-tour-20260928';
+var CACHE = 'smc-alpha-animation-toggle-welcome-no-dots-20260928';
 var CORE = [
   './',
   './index.html',

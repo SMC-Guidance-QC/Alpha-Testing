@@ -1,7 +1,7 @@
 "use strict";
 window.SMC = window.SMC || {};
 SMC.settings = (function () {
-    var THEME_KEY = 'smc-theme', REPORTS_KEY = 'smc-reports';
+    var THEME_KEY = 'smc-theme', ANIMATION_KEY = 'smc-theme-animations', REPORTS_KEY = 'smc-reports';
     var user = null;
     function ui() { return SMC.ui || {}; }
     function api() { return SMC.api || {}; }
@@ -20,6 +20,18 @@ SMC.settings = (function () {
         try { localStorage.setItem(THEME_KEY, theme); } catch (e) {}
         syncThemeUI();
         toast('Theme changed to ' + ({ wood: 'Wood & Navy', light: 'Classic Light', dark: 'Midnight Navy', sage: 'Calm Sage', sakura: 'Sakura' }[theme]) + '.', 'ok');
+    }
+    function animationsOn() { return document.documentElement.getAttribute('data-animations') !== 'off'; }
+    function syncAnimationUI() {
+        var b = document.getElementById('setAnimations'), on = animationsOn();
+        if (!b) return;
+        b.classList.toggle('on', on); b.setAttribute('aria-checked', on ? 'true' : 'false');
+    }
+    function toggleAnimations() {
+        var on = !animationsOn();
+        document.documentElement.setAttribute('data-animations', on ? 'on' : 'off');
+        try { localStorage.setItem(ANIMATION_KEY, on ? 'on' : 'off'); } catch (e) {}
+        syncAnimationUI(); toast('Theme animations turned ' + (on ? 'on.' : 'off.'), 'ok');
     }
     function syncThemeUI() {
         var current = getTheme();
@@ -85,6 +97,7 @@ SMC.settings = (function () {
     function open(u) {
         if (u) user = u;
         syncThemeUI();
+        syncAnimationUI();
         renderReports();
         var m = document.getElementById('settingsModal');
         if (m) { m.classList.add('on'); m.setAttribute('aria-hidden', 'false'); }
@@ -107,6 +120,8 @@ SMC.settings = (function () {
                 var c = choices.querySelector('[data-theme-choice="' + THEMES[next] + '"]'); if (c) c.focus();
             });
         }
+        var anim = document.getElementById('setAnimations');
+        if (anim) anim.addEventListener('click', toggleAnimations);
         var replay = document.getElementById('setReplayTour');
         if (replay) replay.addEventListener('click', function () { close(); if (SMC.app && SMC.app.showUpdateTour) SMC.app.showUpdateTour(); });
         var sc = document.getElementById('setClose');
@@ -117,6 +132,7 @@ SMC.settings = (function () {
         if (m) m.addEventListener('click', function (e) { if (e.target === m) close(); });
         document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { var mm = document.getElementById('settingsModal'); if (mm && mm.classList.contains('on')) close(); } });
         syncThemeUI();
+        syncAnimationUI();
     }
     return { open: open, close: close, bind: bind, setUser: setUser, applyTheme: applyTheme, getTheme: getTheme };
 })();

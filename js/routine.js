@@ -15,6 +15,8 @@ SMC.routine = (function () {
 	var state = { desig: "all", section: "", status: "", q: "", showDropped: false, sexes: [], types: [], concerns: [], levels: [], dateFrom: "", dateTo: "" };
 	var CONCERNS = ["Behavior", "Academic", "Close Monitoring"];
 	var records = load();
+	var selected = {};
+	var bulkBusy = false;
 
 	function esc(s) { return (ui && ui.esc) ? ui.esc(s) : String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]; }); }
 	function load(){return {};}
@@ -126,6 +128,7 @@ SMC.routine = (function () {
 			'<span class="ri-date-range"><span class="ri-date-lb">Interview</span><input type="date" id="riFrom" class="ri-filter ri-date-in" title="Interview date from"><span class="ri-date-sep">\u2013</span><input type="date" id="riTo" class="ri-filter ri-date-in" title="Interview date to"></span>' +
 			'<label class="ri-drop-toggle"><input type="checkbox" id="riShowDropped"> Show dropouts</label>' +
 			'</div>' +
+			'<div class="ri-bulk" id="riBulk"><label class="ri-bulk-check"><input type="checkbox" id="riSelectAll"> Select visible</label><span class="ri-bulk-count" id="riBulkCount">0 selected</span><select class="ri-filter" id="riBulkStatus"><option value="">Set status to…</option>' + STATUSES.map(function (st) { return '<option value="' + st + '">' + st + '</option>'; }).join('') + '</select><button type="button" class="ri-btn primary" id="riBulkApply" disabled>Update selected</button><button type="button" class="ri-btn ghost" id="riBulkClear">Clear</button></div>' +
 			'<div class="ri-tbl-wrap"><table class="ri-tbl"><thead id="riHead"></thead><tbody id="riTbody"></tbody></table></div>' +
 			'</div>';
 		buildFilters();
@@ -205,7 +208,7 @@ SMC.routine = (function () {
 			head.innerHTML = '<tr><th>#</th><th>Student</th>' + (showD ? '<th>Designate</th>' : '') + '<th>Grade &amp; Section</th><th>Sex</th><th>Status</th><th></th></tr>';
 			return;
 		}
-		head.innerHTML = '<tr><th>#</th><th>Student</th>' + (showD ? '<th>Designate</th>' : '') + '<th>Grade &amp; Section</th><th>Sex</th><th>Status</th><th>Interview date</th><th>Notes</th><th></th></tr>';
+		head.innerHTML = '<tr><th><input type="checkbox" id="riHeadSelect" aria-label="Select all visible students"></th><th>#</th><th>Student</th>' + (showD ? '<th>Designate</th>' : '') + '<th>Grade &amp; Section</th><th>Sex</th><th>Status</th><th>Interview date</th><th>Notes</th><th></th></tr>';
 	}
 
 	function drawRows() {
@@ -247,7 +250,7 @@ SMC.routine = (function () {
 			if (state.status && recOf(s.lrn).status !== state.status) return false;
 			return true;
 		}));
-		var colspan = showD ? 9 : 8;
+		var colspan = showD ? 10 : 9;
 		if (!list.length) { tb.innerHTML = '<tr><td colspan="' + colspan + '" class="ri-empty">No students match your filters.</td></tr>'; return; }
 		tb.innerHTML = list.map(function (s, idx) {
 			var r = recOf(s.lrn);
@@ -255,6 +258,7 @@ SMC.routine = (function () {
 			var opts = STATUSES.map(function (st) { return '<option value="' + st + '"' + (r.status === st ? ' selected' : '') + '>' + st + '</option>'; }).join('');
 			var note = r.notes ? '<span class="ri-note-has">' + esc(r.notes.length > 40 ? r.notes.slice(0, 40) + "\u2026" : r.notes) + '</span>' : '<span class="ri-note-add">+ Add note</span>';
 			return '<tr data-lrn="' + esc(s.lrn) + '">' +
+				'<td class="ri-pick"><input type="checkbox" class="ri-row-check" data-lrn="' + esc(s.lrn) + '"' + (selected[s.lrn] ? ' checked' : '') + ' aria-label="Select ' + esc(s.name) + '"></td>' +
 				'<td class="ri-num">' + (idx + 1) + '</td>' +
 				'<td class="ri-nm">' + esc(s.name) + '<span class="ri-lrn">' + esc(s.lrn) + '</span></td>' +
 				(showD ? '<td class="ri-desig">' + esc(d ? d.name : "\u2014") + '</td>' : '') +
@@ -268,21 +272,42 @@ SMC.routine = (function () {
 		}).join('');
 	}
 
-	function refresh() { buildTabs(); updateSummary(); buildHead(); drawRows(); }
+	function selectedLrns() { return Object.keys(selected).filter(function (k) { return selected[k]; }); }
+	function updateBulkUI() {
+		var n = selectedLrns().length, count = document.getElementById("riBulkCount"), apply = document.getElementById("riBulkApply"), status = document.getElementById("riBulkStatus");
+		if (count) count.textContent = n + " selected";
+		if (apply) apply.disabled = bulkBusy || !n || !(status && status.value);
+		var boxes = document.querySelectorAll(".ri-row-check"); var checked = 0; for (var i=0;i<boxes.length;i++) if (boxes[i].checked) checked++;
+		var all = document.getElementById("riSelectAll"), head = document.getElementById("riHeadSelect");
+		[all,head].forEach(function (x) { if (!x) return; x.checked = boxes.length > 0 && checked === boxes.length; x.indeterminate = checked > 0 && checked < boxes.length; });
+	}
+	function clearSelection() { selected = {}; var boxes=document.querySelectorAll(".ri-row-check"); for(var i=0;i<boxes.length;i++) boxes[i].checked=false; updateBulkUI(); }
+	function toggleVisible(on) { var boxes=document.querySelectorAll(".ri-row-check"); for(var i=0;i<boxes.length;i++){boxes[i].checked=on;selected[boxes[i].getAttribute("data-lrn")]=on;} updateBulkUI(); }
+	function applyBulkStatus() {
+		var lrns=selectedLrns(), status=document.getElementById("riBulkStatus"), btn=document.getElementById("riBulkApply"); if(!lrns.length||!status||!status.value)return;
+		var value=status.value; if(typeof window.confirm==="function"&&!window.confirm("Update "+lrns.length+" students to "+value+"?"))return;
+		bulkBusy=true;if(btn){btn.disabled=true;btn.textContent="Updating…";}
+		var updates=lrns.map(function(lrn){var rec=recOf(lrn);rec.status=value;return {lrn:lrn,status:rec.status,date:rec.date,notes:rec.notes,dropout:rec.dropout};});
+		function done(){updates.forEach(function(u){setRec(u.lrn,{status:value});});bulkBusy=false;selected={};if(ui&&ui.toast)ui.toast(lrns.length+" students updated to "+value+".","ok");refresh();var b=document.getElementById("riBulkApply");if(b)b.textContent="Update selected";updateBulkUI();}
+		function fail(){bulkBusy=false;if(btn){btn.disabled=false;btn.textContent="Update selected";}if(ui&&ui.toast)ui.toast("Could not update all students.","err");fetchRemote();}
+		if(SMC.api&&SMC.api.saveRoutineBulk)SMC.api.saveRoutineBulk(updates).then(done).catch(fail);else fail();
+	}
+
+	function refresh() { buildTabs(); updateSummary(); buildHead(); drawRows(); var bulk=document.getElementById("riBulk"); if(bulk) bulk.style.display=state.showDropped?"none":""; updateBulkUI(); }
 
 	function bind() {
 		var tabs = document.getElementById("riTabs");
 		if (tabs) tabs.addEventListener("click", function (e) {
 			var b = e.target.closest(".ri-tab"); if (!b) return;
-			state.desig = b.getAttribute("data-d"); state.levels = []; state.section = "";
+			state.desig = b.getAttribute("data-d"); state.levels = []; state.section = ""; selected = {};
 			buildFilters(); refresh();
 		});
-		var s = document.getElementById("riSearch"); if (s) s.addEventListener("input", function () { state.q = this.value; drawRows(); });
-		var sec = document.getElementById("riSection"); if (sec) sec.addEventListener("change", function () { state.section = this.value; drawRows(); });
-		var stf = document.getElementById("riStatusF"); if (stf) stf.addEventListener("change", function () { state.status = this.value; drawRows(); });
-		var sd = document.getElementById("riShowDropped"); if (sd) sd.addEventListener("change", function () { state.showDropped = this.checked; buildHead(); drawRows(); });
-		var fr = document.getElementById("riFrom"); if (fr) fr.addEventListener("change", function () { state.dateFrom = this.value; updateFilterBadge(); drawRows(); });
-		var to = document.getElementById("riTo"); if (to) to.addEventListener("change", function () { state.dateTo = this.value; updateFilterBadge(); drawRows(); });
+		var s = document.getElementById("riSearch"); if (s) s.addEventListener("input", function () { state.q = this.value; clearSelection(); drawRows(); });
+		var sec = document.getElementById("riSection"); if (sec) sec.addEventListener("change", function () { state.section = this.value; clearSelection(); drawRows(); });
+		var stf = document.getElementById("riStatusF"); if (stf) stf.addEventListener("change", function () { state.status = this.value; clearSelection(); drawRows(); });
+		var sd = document.getElementById("riShowDropped"); if (sd) sd.addEventListener("change", function () { state.showDropped = this.checked; selected = {}; refresh(); });
+		var fr = document.getElementById("riFrom"); if (fr) fr.addEventListener("change", function () { state.dateFrom = this.value; clearSelection(); clearSelection(); updateFilterBadge(); drawRows(); });
+		var to = document.getElementById("riTo"); if (to) to.addEventListener("change", function () { state.dateTo = this.value; clearSelection(); clearSelection(); updateFilterBadge(); drawRows(); });
 		var fb = document.getElementById("riFilterBtn"); if (fb) fb.addEventListener("click", function (e) { e.stopPropagation(); var p = document.getElementById("riFilterPanel"); if (p) p.hidden = !p.hidden; });
 		var fp = document.getElementById("riFilterPanel");
 		if (fp) {
@@ -294,7 +319,7 @@ SMC.routine = (function () {
 				var i = arr.indexOf(v);
 				if (c.checked) { if (i === -1) arr.push(v); } else if (i !== -1) { arr.splice(i, 1); }
 				if (g === "level") buildFilters();
-				updateFilterBadge(); drawRows();
+				clearSelection(); updateFilterBadge(); drawRows();
 			});
 		}
 		var fcl = document.getElementById("riFilterClear");
@@ -322,6 +347,12 @@ SMC.routine = (function () {
 				if (rb) { markDropout(rb.getAttribute("data-lrn"), false); return; }
 			});
 		}
+		var bulkStatus=document.getElementById("riBulkStatus");if(bulkStatus)bulkStatus.addEventListener("change",updateBulkUI);
+		var bulkApply=document.getElementById("riBulkApply");if(bulkApply)bulkApply.addEventListener("click",applyBulkStatus);
+		var bulkClear=document.getElementById("riBulkClear");if(bulkClear)bulkClear.addEventListener("click",clearSelection);
+		var bulkAll=document.getElementById("riSelectAll");if(bulkAll)bulkAll.addEventListener("change",function(){toggleVisible(this.checked);});
+		var riHead=document.getElementById("riHead");if(riHead)riHead.addEventListener("change",function(e){if(e.target.id==="riHeadSelect")toggleVisible(e.target.checked);});
+		if(tb)tb.addEventListener("change",function(e){var c=e.target.closest(".ri-row-check");if(c){selected[c.getAttribute("data-lrn")]=c.checked;updateBulkUI();}});
 		var pr = document.getElementById("riPrint"); if (pr) pr.addEventListener("click", printList);
 	}
 

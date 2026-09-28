@@ -196,6 +196,7 @@ SMC.api = (function () {
         listRoutine: function () { return call('listRoutine', {}); },
         listSchedules: function () { return call('listSchedules', {}); },
         saveRoutine: function (data) { return call('saveRoutine', data); },
+        saveRoutineBulk: function (updates) { return call('saveRoutineBulk', { updates: updates || [] }); },
         securityStatus: function () { return call('securityStatus', {}); },
         unlockSite: function (code) { return call('unlockSite', { code: code }); },
         getSecurity: function () { return call('getSecurity', {}); },
