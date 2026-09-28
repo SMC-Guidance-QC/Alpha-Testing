@@ -390,6 +390,8 @@ function evalBuildRecord(table, skipAdviserLookup) {
     var teacher = evalNormalizeTeacher(teacherNames);
 
     var grade = evalDetectGrade(section, table.name + ' ' + subject);
+    var officialSection = evalOfficialSectionMeta(section, grade);
+    if (officialSection) grade = officialSection.grade;
     if (grade === null) {
         return { ok: false, note: table.name + ': could not detect a grade level from "' + section + '".' };
     }
@@ -452,6 +454,8 @@ function evalBuildRecord(table, skipAdviserLookup) {
             subject: subject,
             section: section,
             grade: grade,
+            officialSectionLetter: officialSection ? officialSection.letter : '',
+            officialSectionName: officialSection ? officialSection.section : '',
             templateKey: key,
             students: students,
             commentGroups: commentGroups
@@ -697,7 +701,7 @@ function handleBuildEvalWorkbooks(session, p) {
     }
 
     var outFolder = p.dryRun ? null : evalOutputFolder();
-    var created = [], notes = [];
+    var created = [], notes = ['Evaluation engine R15 active — official section mapping and missing-section diagnostics enabled.'];
 
     var totalEntries = 0;
     for (var bc = 0; bc < batches.length; bc++) totalEntries += (batches[bc].entries || []).length;
@@ -919,6 +923,31 @@ function evalSectionLetter(grade, section, fallbackSections) {
     return '';
 }
 
+/** Resolve the official grade and letter from a section name, independent of folder name. */
+function evalOfficialSectionMeta(section, gradeHint) {
+    // Accept compact answers such as 9A, 9B, 9C, 9D before fuzzy name matching.
+    var compact = String(section || '').toUpperCase().match(/(?:GRADE\s*)?(\d{1,2})\s*([A-Z])\b/);
+    if (compact) {
+        var cg = Number(compact[1]), ci = compact[2].charCodeAt(0) - 65, compactRoster = EVAL_SECTION_ROSTER[cg] || [];
+        if (ci >= 0 && ci < compactRoster.length) return { grade: cg, letter: compact[2], section: compactRoster[ci], index: ci };
+    }
+    var key = evalSectionKey(section);
+    if (!key) return null;
+    var grades = [];
+    if (gradeHint !== null && gradeHint !== undefined && EVAL_SECTION_ROSTER[gradeHint]) grades.push(Number(gradeHint));
+    for (var g in EVAL_SECTION_ROSTER) if (EVAL_SECTION_ROSTER.hasOwnProperty(g) && grades.indexOf(Number(g)) < 0) grades.push(Number(g));
+    for (var x = 0; x < grades.length; x++) {
+        var grade = grades[x], list = EVAL_SECTION_ROSTER[grade] || [];
+        for (var i = 0; i < list.length; i++) {
+            var rosterKey = evalSectionKey(list[i]);
+            if (key === rosterKey || (key.length >= 3 && rosterKey.length >= 3 && (key.indexOf(rosterKey) >= 0 || rosterKey.indexOf(key) >= 0))) {
+                return { grade: grade, letter: String.fromCharCode(65 + i), section: list[i], index: i };
+            }
+        }
+    }
+    return null;
+}
+
 /** "Araling Panlipunan" -> "AP". Unknown multi-word subjects become initials. */
 function evalSubjectAcronym(subject) {
     var key = String(subject || '').toUpperCase()
@@ -961,7 +990,7 @@ function evalCompareRecordsForTabs(a, b) {
     if (as !== bs) return as < bs ? -1 : 1;
 
     function sectionKey(record) {
-        var letter = evalSectionLetter(record.grade, record.section, null);
+        var letter = record.officialSectionLetter || evalSectionLetter(record.grade, record.section, null);
         return letter || evalSectionKey(record.section);
     }
     var al = sectionKey(a), bl = sectionKey(b);
@@ -978,7 +1007,7 @@ function evalTabLabel(record, templateKey, fallbackSections) {
     var section = String(record.section || '').trim();
 
     var hasGrade = record.grade !== null && record.grade !== undefined && String(record.grade) !== '';
-    var letter = hasGrade ? evalSectionLetter(record.grade, section, fallbackSections) : '';
+    var letter = record.officialSectionLetter || (hasGrade ? evalSectionLetter(record.grade, section, fallbackSections) : '');
     if (hasGrade && letter) {
         var gradeCode = Number(record.grade) === 0 ? 'K' : String(record.grade);
         var base = gradeCode + letter;
@@ -1030,7 +1059,23 @@ function evalWriteSummaryTab(ss, spec, records, tabNames, used) {
 
     var wanted = [];
     for (var g = 0; g < groups.length; g++) {
-        if (groups[g].items.length > 1) wanted.push(groups[g]);
+        var group = groups[g];
+        if (group.items.length <= 1) continue;
+        var roster = EVAL_SECTION_ROSTER[group.grade] || [];
+        if (roster.length) {
+            var byLetter = {}, unknown = [];
+            for (var gi = 0; gi < group.items.length; gi++) {
+                var item = group.items[gi], letter = item.record.officialSectionLetter || evalSectionLetter(group.grade, item.record.section, null);
+                if (letter) byLetter[letter] = item; else unknown.push(item);
+            }
+            var expanded = [];
+            for (var ri = 0; ri < roster.length; ri++) {
+                var expected = String.fromCharCode(65 + ri);
+                expanded.push(byLetter[expected] || { record: { grade: group.grade, subject: group.subject, section: roster[ri], officialSectionLetter: expected }, tab: '', missing: true });
+            }
+            group.items = expanded.concat(unknown);
+        }
+        wanted.push(group);
     }
     if (!wanted.length) return null;
 
@@ -1044,7 +1089,8 @@ function evalWriteSummaryTab(ss, spec, records, tabNames, used) {
         var grp = wanted[q];
         var cols = grp.items.length;
         var meanCol = 2 + cols;              // column right after the sections
-        var src = ss.getSheetByName(grp.items[0].tab);
+        var src = null;
+        for (var si = 0; si < grp.items.length && !src; si++) if (grp.items[si].tab) src = ss.getSheetByName(grp.items[si].tab);
 
         var heading = (grp.grade ? 'Grade ' + grp.grade : 'ALL GRADES')
             + (grp.subject ? '  -  ' + grp.subject : '');
@@ -1055,7 +1101,7 @@ function evalWriteSummaryTab(ss, spec, records, tabNames, used) {
             var block = blocks[b];
 
             var header = [block.title];
-            for (var h = 0; h < cols; h++) header.push(grp.items[h].tab);
+            for (var h = 0; h < cols; h++) { var hi = grp.items[h]; var hc = (Number(grp.grade) === 0 ? 'K' : String(grp.grade)) + (hi.record.officialSectionLetter || evalSectionLetter(grp.grade, hi.record.section, null)); header.push(hi.tab || (hc + ' - ' + evalSubjectAcronym(grp.subject) + ' (NO DATA)')); }
             header.push('AVERAGE');
             sheet.getRange(row, 1, 1, header.length).setValues([header])
                 .setFontWeight('bold').setBackground('#ffff00');
@@ -1072,8 +1118,8 @@ function evalWriteSummaryTab(ss, spec, records, tabNames, used) {
 
                 var line = [];
                 for (var c = 0; c < cols; c++) {
-                    var tab = String(grp.items[c].tab).replace(/'/g, "''");
-                    line.push("='" + tab + "'!" + avgCol + sheetRow);
+                    var tab = String(grp.items[c].tab || '').replace(/'/g, "''");
+                    line.push(tab ? ("='" + tab + "'!" + avgCol + sheetRow) : '');
                 }
                 line.push('=IFERROR(AVERAGE(B' + row + ':' + evalColLetter(1 + cols) + row + '),"")');
                 formulas.push(line);
