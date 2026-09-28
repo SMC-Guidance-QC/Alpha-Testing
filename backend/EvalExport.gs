@@ -701,7 +701,7 @@ function handleBuildEvalWorkbooks(session, p) {
     }
 
     var outFolder = p.dryRun ? null : evalOutputFolder();
-    var created = [], notes = ['Evaluation engine R15 active — official section mapping and missing-section diagnostics enabled.'];
+    var created = [], notes = ['Evaluation engine R16 active — canonical section mapping and normalized subject grouping enabled.'];
 
     var totalEntries = 0;
     for (var bc = 0; bc < batches.length; bc++) totalEntries += (batches[bc].entries || []).length;
@@ -1049,10 +1049,11 @@ function evalSummaryBlocks(spec) {
 function evalWriteSummaryTab(ss, spec, records, tabNames, used) {
     var groups = [], index = {};
     for (var i = 0; i < records.length; i++) {
-        var gk = String(records[i].grade || '?') + '|' + String(records[i].subject || '?');
+        var subjectKey = evalSubjectAcronym(records[i].subject) || evalSignatureText(records[i].subject) || '?';
+        var gk = String(records[i].grade == null ? '?' : records[i].grade) + '|' + subjectKey;
         if (!(gk in index)) {
             index[gk] = groups.length;
-            groups.push({ grade: records[i].grade, subject: records[i].subject, items: [] });
+            groups.push({ grade: records[i].grade, subject: records[i].subject, subjectKey: subjectKey, items: [] });
         }
         groups[index[gk]].items.push({ record: records[i], tab: tabNames[i] });
     }

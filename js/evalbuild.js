@@ -970,6 +970,13 @@ SMC.evalbuild = (function () {
     } return s; }
     function deriveSubject(merged) { var cols = detectColumns(merged.headers, merged.rows); if (cols.subject < 0)
         return ''; return dominantSection(merged.rows, cols.subject) || ''; }
+    function subjectGroupKey(subject) {
+        var raw = String(subject || '').toUpperCase().replace(/[^A-Z0-9&]+/g, ' ').replace(/\s+/g, ' ').trim();
+        var bare = raw.replace(/\bGRADE\b/g, ' ').replace(/\b\d{1,2}\b/g, ' ').replace(/\s+/g, ' ').trim();
+        var known = { 'ARALING PANLIPUNAN':'AP', 'A P':'AP', 'MATHEMATICS':'MATH', 'MATH':'MATH', 'CHRISTIAN LIVING EDUCATION':'CLE', 'TECHNOLOGY AND LIVELIHOOD EDUCATION':'TLE', 'PHYSICAL EDUCATION':'PE', 'INFORMATION AND COMMUNICATIONS TECHNOLOGY':'ICT', 'INFORMATION AND COMMUNICATION TECHNOLOGY':'ICT', 'HOMEROOM GUIDANCE':'HG', 'VALUES EDUCATION':'VALUES' };
+        if (known[bare]) return known[bare];
+        return bare.replace(/[^A-Z0-9]/g, '') || raw.replace(/[^A-Z0-9]/g, '');
+    }
     function normalizeTeacherName(name) {
         if (!name)
             return '';
@@ -1020,7 +1027,7 @@ SMC.evalbuild = (function () {
                 break;
             }
         }
-        var key = (teacher || '') + '||' + (subject || '') + '||' + grade.key;
+        var key = (teacher || '') + '||' + subjectGroupKey(subject) + '||' + grade.key;
         var result = null, i;
         for (i = 0; i < built.length; i++) {
             if (built[i].key === key) {

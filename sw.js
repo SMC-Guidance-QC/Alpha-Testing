@@ -1,6 +1,6 @@
 /* SMC Guidance Center - service worker (PWA app shell) */
 "use strict";
-var CACHE = 'smc-alpha-evaluation-canonical-mapping-20260928r15';
+var CACHE = 'smc-alpha-evaluation-subject-grouping-20260928r16';
 var CORE = [
   './',
   './index.html',
