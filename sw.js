@@ -1,6 +1,6 @@
 /* SMC Guidance Center - service worker (PWA app shell) */
 "use strict";
-var CACHE = 'smc-alpha-static-session-gradient-20260928r11';
+var CACHE = 'smc-alpha-evaluation-section-order-20260928r13';
 var CORE = [
   './',
   './index.html',

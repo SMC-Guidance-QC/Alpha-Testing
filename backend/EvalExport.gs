@@ -814,18 +814,25 @@ function handleBuildEvalWorkbooks(session, p) {
 /** Copies the template and fills one tab per section. */
 // ---------------------------------------------------------------------------
 // Tab naming: "10A - AP"
-//   grade + section letter (sections of that grade in alphabetical order)
-//   + the subject acronym. Senior High keeps its real section name instead of
-//   a letter, because SHS strands are not lettered.
+//   grade + official section letter (using the approved per-grade sequence)
+//   + the subject acronym. Kinder uses K; Grades 1–12 use their grade number. All levels use A/B/C order.
 // ---------------------------------------------------------------------------
 
-// Sections per grade, ALPHABETICAL. Position decides the letter, so
-// ADOLPHINE = A, AMANDINE = B, CHIARA = C. Edit this list if sections change.
+// Approved sections per grade. Position decides the official A/B/C/D letter.
 var EVAL_SECTION_ROSTER = {
+    0: ['JOY'],
+    1: ['MATAPAT', 'MATATAG', 'MATIYAGA'],
+    2: ['MAPAGBIGAY', 'MAPAGLINGKOD', 'MAPAGMAHAL'],
+    3: ['MAKA DIOS', 'MAKABAYAN', 'MAKATAO'],
+    4: ['COURAGE', 'JUSTICE'],
+    5: ['HUMILITY', 'SIMPLICITY'],
+    6: ['FORTITUDE', 'PIETY'],
     7: ['HOSEA', 'ISAIAH', 'JEREMIAH', 'MICAH'],
     8: ['JOHN', 'LUKE', 'MARK', 'MATTHEW'],
-    9: ['AGNES', 'ANTHONY', 'CLARE'],
-    10: ['ADOLPHINE', 'AMANDINE', 'CHIARA']
+    9: ['AGNES', 'ANTHONY', 'CLARE', 'PADRE PIO'],
+    10: ['ADOLPHINE', 'AMANDINE', 'CHIARA'],
+    11: ['HOPE', 'MERCY'],
+    12: ['CHARITY', 'TRUTH']
 };
 
 var EVAL_SUBJECT_ACRONYMS = {
@@ -952,15 +959,11 @@ function evalTabLabel(record, templateKey, fallbackSections) {
     var subject = evalSubjectAcronym(record.subject);
     var section = String(record.section || '').trim();
 
-    // Senior High: keep the real section name, no letter.
-    if (templateKey === 'shs') {
-        if (section && subject) return section + ' - ' + subject;
-        return section || subject || 'SECTION';
-    }
-
-    var letter = record.grade ? evalSectionLetter(record.grade, section, fallbackSections) : '';
-    if (record.grade && letter) {
-        var base = String(record.grade) + letter;
+    var hasGrade = record.grade !== null && record.grade !== undefined && String(record.grade) !== '';
+    var letter = hasGrade ? evalSectionLetter(record.grade, section, fallbackSections) : '';
+    if (hasGrade && letter) {
+        var gradeCode = Number(record.grade) === 0 ? 'K' : String(record.grade);
+        var base = gradeCode + letter;
         return subject ? base + ' - ' + subject : base;
     }
 

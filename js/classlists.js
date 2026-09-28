@@ -6,6 +6,8 @@ SMC.classlists = (function () {
 	var state = { view: "grid", key: null };
 	var FLAGS = ["Behavior", "Academic", "Close Monitoring"];
 	var LEVEL_ORDER = ["Kinder", "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6", "Grade 7", "Grade 8", "Grade 9", "Grade 10", "Grade 11", "Grade 12"];
+
+	var SECTION_ORDER = {"Kinder": ["Joy"], "Grade 1": ["Matapat", "Matatag", "Matiyaga"], "Grade 2": ["Mapagbigay", "Mapaglingkod", "Mapagmahal"], "Grade 3": ["Maka-Dios", "Makabayan", "Makatao"], "Grade 4": ["Courage", "Justice"], "Grade 5": ["Humility", "Simplicity"], "Grade 6": ["Fortitude", "Piety"], "Grade 7": ["Hosea", "Isaiah", "Jeremiah", "Micah"], "Grade 8": ["St. John", "St. Luke", "St. Mark", "St. Matthew"], "Grade 9": ["St. Agnes", "St. Anthony", "St. Clare", "St. Padre Pio"], "Grade 10": ["St. Adolphine", "St. Amandine", "St. Chiara"], "Grade 11": ["Hope", "Mercy"], "Grade 12": ["Charity", "Truth"]};
 	var localFlags = {};
 	var rosterLoaded=false, rosterLoading=null, rosterError="";
 	var PALETTE = ["#002B6B", "#2F6DB5", "#2A9D8F", "#3E8E5A", "#BFA050", "#D98324", "#C94040", "#C65A93", "#7A5AA8", "#5B6B85"];
@@ -64,10 +66,13 @@ SMC.classlists = (function () {
 	function data() { return SMC.classListData || []; }
 	function keyOf(s) { return s.level + "||" + s.section; }
 	function levelIdx(l) { var i = LEVEL_ORDER.indexOf(l); return i < 0 ? 999 : i; }
+	function sectionIdx(level, section) { var list = SECTION_ORDER[level] || []; var i = list.indexOf(section); return i < 0 ? 999 : i; }
 	function sorted() {
 		return data().slice().sort(function (a, b) {
 			var d = levelIdx(a.level) - levelIdx(b.level);
-			return d !== 0 ? d : a.section.localeCompare(b.section);
+			if (d !== 0) return d;
+			var sd = sectionIdx(a.level, a.section) - sectionIdx(b.level, b.section);
+			return sd !== 0 ? sd : a.section.localeCompare(b.section);
 		});
 	}
 	function findByKey(k) { var d = data(); for (var i = 0; i < d.length; i++) { if (keyOf(d[i]) === k) return d[i]; } return null; }

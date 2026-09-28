@@ -6,6 +6,8 @@ SMC.routine = (function () {
 	var LS_KEY = "smc-routine-interviews";
 	var STATUSES = ["Pending", "Scheduled", "Done"];
 	var LEVEL_ORDER = ["Kinder", "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6", "Grade 7", "Grade 8", "Grade 9", "Grade 10", "Grade 11", "Grade 12"];
+
+	var SECTION_ORDER = {"Kinder": ["Joy"], "Grade 1": ["Matapat", "Matatag", "Matiyaga"], "Grade 2": ["Mapagbigay", "Mapaglingkod", "Mapagmahal"], "Grade 3": ["Maka-Dios", "Makabayan", "Makatao"], "Grade 4": ["Courage", "Justice"], "Grade 5": ["Humility", "Simplicity"], "Grade 6": ["Fortitude", "Piety"], "Grade 7": ["Hosea", "Isaiah", "Jeremiah", "Micah"], "Grade 8": ["St. John", "St. Luke", "St. Mark", "St. Matthew"], "Grade 9": ["St. Agnes", "St. Anthony", "St. Clare", "St. Padre Pio"], "Grade 10": ["St. Adolphine", "St. Amandine", "St. Chiara"], "Grade 11": ["Hope", "Mercy"], "Grade 12": ["Charity", "Truth"]};
 	var DESIGNATES = [
 		{ id: "mamaril", name: "Ms. Mamaril", levels: ["Grade 12", "Grade 7", "Grade 6"] },
 		{ id: "quilatan", name: "Ms. Quilatan", levels: ["Grade 9", "Grade 8", "Kinder"] },
@@ -47,6 +49,7 @@ SMC.routine = (function () {
 
 	function setUser(u) { user = u; }
 	function levelIdx(l) { var i = LEVEL_ORDER.indexOf(l); return i < 0 ? 999 : i; }
+	function sectionIdx(level, section) { var list = SECTION_ORDER[level] || []; var i = list.indexOf(section); return i < 0 ? 999 : i; }
 	function desigOf(id) { for (var i = 0; i < DESIGNATES.length; i++) if (DESIGNATES[i].id === id) return DESIGNATES[i]; return null; }
 	function levelDesig(level) { for (var i = 0; i < DESIGNATES.length; i++) if (DESIGNATES[i].levels.indexOf(level) !== -1) return DESIGNATES[i]; return null; }
 	function host() { return document.getElementById("routineView"); }
@@ -79,7 +82,7 @@ SMC.routine = (function () {
 		return list.slice().sort(function (a, b) {
 			var d = levelIdx(a.level) - levelIdx(b.level);
 			if (d !== 0) return d;
-			if (a.section !== b.section) return a.section.localeCompare(b.section);
+			if (a.section !== b.section) { var sd = sectionIdx(a.level, a.section) - sectionIdx(b.level, b.section); return sd !== 0 ? sd : a.section.localeCompare(b.section); }
 			return a.name.localeCompare(b.name);
 		});
 	}
@@ -163,9 +166,9 @@ SMC.routine = (function () {
 		state.levels = state.levels.filter(function (l) { return levels.indexOf(l) !== -1; });
 		var lc = document.getElementById("riLvlChecks");
 		if (lc) lc.innerHTML = levels.map(function (l) { return '<label class="ri-fck"><input type="checkbox" class="ri-fchk" data-g="level" value="' + esc(l) + '"' + (state.levels.indexOf(l) !== -1 ? ' checked' : '') + '> ' + esc(l) + '</label>'; }).join('');
-		var secs = [];
-		scope.forEach(function (s) { if ((!state.levels.length || state.levels.indexOf(s.level) !== -1) && secs.indexOf(s.section) === -1) secs.push(s.section); });
-		secs.sort(function (a, b) { return a.localeCompare(b); });
+		var secs = [], secRank = {};
+		scope.forEach(function (s) { if (!state.levels.length || state.levels.indexOf(s.level) !== -1) { if (secs.indexOf(s.section) === -1) secs.push(s.section); var rank = levelIdx(s.level) * 100 + sectionIdx(s.level, s.section); if (secRank[s.section] == null || rank < secRank[s.section]) secRank[s.section] = rank; } });
+		secs.sort(function (a, b) { var d = (secRank[a] || 0) - (secRank[b] || 0); return d !== 0 ? d : a.localeCompare(b); });
 		var secSel = document.getElementById("riSection");
 		if (secSel) {
 			if (secs.indexOf(state.section) === -1) state.section = "";

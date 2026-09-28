@@ -853,6 +853,22 @@ SMC.evalbuild = (function () {
         });
         return map;
     }
+    var OFFICIAL_SECTION_ORDER = {
+        0: ['Joy'], 1: ['Matapat','Matatag','Matiyaga'], 2: ['Mapagbigay','Mapaglingkod','Mapagmahal'],
+        3: ['Maka-Dios','Makabayan','Makatao'], 4: ['Courage','Justice'], 5: ['Humility','Simplicity'],
+        6: ['Fortitude','Piety'], 7: ['Hosea','Isaiah','Jeremiah','Micah'],
+        8: ['St. John','St. Luke','St. Mark','St. Matthew'],
+        9: ['St. Agnes','St. Anthony','St. Clare','St. Padre Pio'],
+        10: ['St. Adolphine','St. Amandine','St. Chiara'], 11: ['Hope','Mercy'], 12: ['Charity','Truth']
+    };
+    function officialSectionMeta(raw, gradeNum) {
+        function norm(v) { return String(v || '').toUpperCase().replace(/\bGRADE\b|\bGR\b|\bSECTION\b|\bST\b/g,' ').replace(/[^A-Z]+/g,' ').replace(/\s+/g,' ').trim(); }
+        var key = norm(raw), grades = gradeNum !== '' && gradeNum != null ? [Number(gradeNum)] : Object.keys(OFFICIAL_SECTION_ORDER).map(Number);
+        for (var g = 0; g < grades.length; g++) { var grade = grades[g], list = OFFICIAL_SECTION_ORDER[grade] || [];
+            for (var i = 0; i < list.length; i++) { var sk = norm(list[i]); if (key === sk || key.indexOf(sk) >= 0 || sk.indexOf(key) >= 0) return { grade: grade, letter: sectionLetter(i), rank: grade * 100 + i, name: list[i] }; }
+        }
+        return { grade: gradeNum === '' ? null : Number(gradeNum), letter: '', rank: 99999, name: '' };
+    }
     var SECTION_STOP = { grade: 1, stem: 1, class: 1, adviser: 1, section: 1, the: 1, of: 1, hs: 1, shs: 1, jhs: 1, level: 1 };
     function sectionInfo(raw) {
         var s = String(raw == null ? '' : raw).toLowerCase();
@@ -917,7 +933,9 @@ SMC.evalbuild = (function () {
         var itemMap = matchCriteria(tpl.allCriteria, cols.items);
         var matched = Object.keys(itemMap).length;
         var students = merged.rows;
-        var info = sectionInfo(dominantSection(merged.rows, cols.section));
+        var rawSection = dominantSection(merged.rows, cols.section);
+        var info = sectionInfo(rawSection);
+        var official = officialSectionMeta(rawSection, info.gradeNum);
         var secLabel = (info.gradeNum ? info.gradeNum + ' - ' : '') + info.display;
         var ws = buildSectionSheet(tpl, teacher, subject, secLabel, students, itemMap);
         var comments = [];
@@ -942,7 +960,7 @@ SMC.evalbuild = (function () {
         }).filter(function (x) { return x != null; });
         var overall = perStudent.length ? round2(perStudent.reduce(function (a, b) { return a + b; }, 0) / perStudent.length) : null;
         var blockAverages = blockAvgsFromLines(tpl.blocks || [], lines);
-        return { secLabel: secLabel, gradeNum: info.gradeNum, ws: ws, students: students.length, overall: overall, lines: lines, blockAverages: blockAverages, comments: comments, matched: matched, totalCriteria: tpl.allCriteria.length, blocks: (tpl.blocks || []).slice() };
+        return { secLabel: secLabel, gradeNum: info.gradeNum, officialGrade: official.grade, officialLetter: official.letter, officialRank: official.rank, ws: ws, students: students.length, overall: overall, lines: lines, blockAverages: blockAverages, comments: comments, matched: matched, totalCriteria: tpl.allCriteria.length, blocks: (tpl.blocks || []).slice() };
     }
     function gradeTagOf(grade) { return grade.label.replace('Senior High School', 'SHS').replace('Junior High School', 'JHS'); }
     function sectionLetter(i) { var s = '', n = i + 1; while (n > 0) {
@@ -1014,6 +1032,7 @@ SMC.evalbuild = (function () {
         if (!result) {
             result = { uid: ++uidc, key: key, teacher: teacher, subject: subject, gradeLabel: grade.label, gradeKey: grade.key, gradeTag: gradeTagOf(grade), sections: [], comments: [], _used: {} };
         }
+        sec._sequence = result.sections.length;
         sec.tab = uniqName(sec.secLabel, result._used);
         result.sections.push(sec);
         result.comments = result.comments.concat(sec.comments || []);
@@ -1023,6 +1042,7 @@ SMC.evalbuild = (function () {
         return result;
     }
     function finalizeGroup(result) {
+        result.sections.sort(function (a, b) { var d = (a.officialRank == null ? 99999 : a.officialRank) - (b.officialRank == null ? 99999 : b.officialRank); return d !== 0 ? d : (a._sequence || 0) - (b._sequence || 0); });
         var wbOut = XLSX.utils.book_new();
         result.sections.forEach(function (s) { XLSX.utils.book_append_sheet(wbOut, s.ws, s.tab); });
         if (result.sections.length >= 2) {
@@ -1043,7 +1063,7 @@ SMC.evalbuild = (function () {
     }
     function buildSummarySheet(result) {
         var secs = result.sections;
-        var labels = secs.map(function (s, i) { return ((result.gradeTag ? result.gradeTag + ' ' : '') + (s.gradeNum || '') + sectionLetter(i)).trim(); });
+        var labels = secs.map(function (s, i) { return ((result.gradeTag ? result.gradeTag + ' ' : '') + (s.gradeNum || '') + (s.officialLetter || sectionLetter(i))).trim(); });
         function critAvg(s, crit) { for (var i = 0; i < s.lines.length; i++) {
             if (s.lines[i].crit === crit) {
                 var sc = s.lines[i].scores;
@@ -1168,7 +1188,7 @@ SMC.evalbuild = (function () {
         var secs = result.sections;
         if (!secs || secs.length < 2)
             return '';
-        var labels = secs.map(function (s, i) { return ((result.gradeTag ? result.gradeTag + ' ' : '') + (s.gradeNum || '') + sectionLetter(i)).trim(); });
+        var labels = secs.map(function (s, i) { return ((result.gradeTag ? result.gradeTag + ' ' : '') + (s.gradeNum || '') + (s.officialLetter || sectionLetter(i))).trim(); });
         function critAvg(s, crit) { for (var k = 0; k < s.lines.length; k++) {
             if (s.lines[k].crit === crit) {
                 var sc = s.lines[k].scores;
