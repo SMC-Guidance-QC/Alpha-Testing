@@ -289,3 +289,34 @@ html[data-animations="off"] #appScreen::after{display:none!important}
 :root[data-theme="wood"] #appScreen::before{animation-duration:18s;filter:saturate(1.15)}
 :root[data-theme="dark"] #appScreen::before,:root[data-theme="light"] #appScreen::before{animation-duration:18s}
 @media(prefers-reduced-motion:reduce){#appScreen::after{display:none!important}}
+
+/* Responsive interaction motion for tab changes and button presses. */
+html:not([data-animations="off"]) .smc-view-enter{animation:smcViewEnter .42s cubic-bezier(.2,.75,.25,1) both}
+html:not([data-animations="off"]) .smc-nav-pop svg{animation:smcNavPop .38s cubic-bezier(.2,.9,.25,1.25)}
+html:not([data-animations="off"]) button,
+html:not([data-animations="off"]) [role="button"],
+html:not([data-animations="off"]) .sbi,
+html:not([data-animations="off"]) .sbsubi{transition:transform .16s ease,box-shadow .2s ease,background-color .2s ease,border-color .2s ease,color .2s ease}
+html:not([data-animations="off"]) button:not(:disabled):hover,
+html:not([data-animations="off"]) [role="button"]:hover{transform:translateY(-2px)}
+html:not([data-animations="off"]) button:not(:disabled):active,
+html:not([data-animations="off"]) [role="button"]:active{transform:translateY(1px) scale(.975);transition-duration:.07s}
+html:not([data-animations="off"]) .sbi:not(.on):hover,
+html:not([data-animations="off"]) .sbsubi:not(.on):hover{transform:translateY(-1px)}
+html:not([data-animations="off"]) .sbi.on,
+html:not([data-animations="off"]) .sbsubi.on{animation:smcTabSelect .34s ease-out}
+html:not([data-animations="off"]) .set-ov.on .set-box,
+html:not([data-animations="off"]) .wni-ov.on .wni-box{animation:smcDialogIn .3s cubic-bezier(.2,.8,.2,1) both}
+@keyframes smcViewEnter{0%{opacity:.25;transform:translateY(14px) scale(.994)}100%{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes smcNavPop{0%{transform:scale(.72) rotate(-5deg)}70%{transform:scale(1.12) rotate(2deg)}100%{transform:scale(1) rotate(0)}}
+@keyframes smcTabSelect{0%{transform:scale(.96)}65%{transform:scale(1.025)}100%{transform:scale(1)}}
+@keyframes smcDialogIn{0%{opacity:0;transform:translateY(16px) scale(.97)}100%{opacity:1;transform:translateY(0) scale(1)}}
+@media(prefers-reduced-motion:reduce){.smc-view-enter,.smc-nav-pop svg,.sbi.on,.sbsubi.on,.set-ov.on .set-box,.wni-ov.on .wni-box{animation:none!important}button,[role="button"],.sbi,.sbsubi{transition:none!important;transform:none!important}}
+html:not([data-animations="off"]) .ri-tab.on,
+html:not([data-animations="off"]) .k2-tabs button.on,
+html:not([data-animations="off"]) .eval-tool-switch.on,
+html:not([data-animations="off"]) [role="tab"][aria-selected="true"]{animation:smcTabSelect .34s ease-out}
+html:not([data-animations="off"]) .eval-panel:not([hidden]),
+html:not([data-animations="off"]) [role="tabpanel"]:not([hidden]){animation:smcInnerPanel .32s ease-out both}
+@keyframes smcInnerPanel{from{opacity:.2;transform:translateX(10px)}to{opacity:1;transform:translateX(0)}}
+@media(prefers-reduced-motion:reduce){.ri-tab.on,.k2-tabs button.on,.eval-tool-switch.on,[role="tab"][aria-selected="true"],.eval-panel:not([hidden]),[role="tabpanel"]:not([hidden]){animation:none!important}}

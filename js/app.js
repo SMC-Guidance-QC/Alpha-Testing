@@ -80,6 +80,18 @@ SMC.app = (function () {
         hideMaintNotice();
         Object.keys(VIEW_META).forEach(function (k) { var el = document.getElementById(VIEW_META[k].el); if (el)
             el.style.display = k === v ? '' : 'none'; });
+        var activeView = document.getElementById(VIEW_META[v].el);
+        if (activeView) {
+            activeView.classList.remove('smc-view-enter');
+            void activeView.offsetWidth;
+            activeView.classList.add('smc-view-enter');
+            clearTimeout(activeView.__smcEnterTimer);
+            activeView.__smcEnterTimer = setTimeout(function () { activeView.classList.remove('smc-view-enter'); }, 520);
+        }
+        if (nav) {
+            nav.classList.remove('smc-nav-pop'); void nav.offsetWidth; nav.classList.add('smc-nav-pop');
+            clearTimeout(nav.__smcPopTimer); nav.__smcPopTimer = setTimeout(function () { nav.classList.remove('smc-nav-pop'); }, 420);
+        }
         if (locked && isAdminUser())
             showAdminBanner();
         else
