@@ -14,7 +14,7 @@
             window.location.reload();
         });
         window.addEventListener('load', function () {
-            navigator.serviceWorker.register('sw.js?v=20260928r13', { updateViaCache: 'none' }).then(function (reg) {
+            navigator.serviceWorker.register('sw.js?v=20260928r14', { updateViaCache: 'none' }).then(function (reg) {
                 if (reg && reg.update) { try { reg.update(); } catch (e) { } }
             }).catch(function () { });
         });

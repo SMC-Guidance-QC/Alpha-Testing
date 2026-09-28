@@ -98,21 +98,39 @@ function evalParseScore(value) {
 
 /** Detects the grade level from free-typed section answers. */
 function evalDetectGrade(sectionText, fallbackText) {
-    var low = (String(sectionText || '') + ' ' + String(fallbackText || '')).toLowerCase();
+    var section = String(sectionText || '');
+    var low = (section + ' ' + String(fallbackText || '')).toLowerCase();
     if (/kinder|nursery|prep/.test(low)) return 0;
-    if (/senior\s*high|\bshs\b/.test(low)) return 11;
-    if (/junior\s*high|\bjhs\b/.test(low)) return 7;
+
+    // An explicit grade number is stronger than a broad folder name such as
+    // “Junior High School” or “Senior High School”.
     var m = low.match(/(?:grade|gr\.?|g)\s*(\d{1,2})/);
     if (m) {
         var g = parseInt(m[1], 10);
         if (g >= 0 && g <= 12) return g;
     }
-    // Handles sections where the grade is glued to the letter, e.g. "4B Justice".
-    m = low.match(/(?:^|[^a-z0-9])(\d{1,2})/);
+    m = low.match(/(?:^|[^a-z0-9])(\d{1,2})(?:[a-d]\b|\b)/);
     if (m) {
         var g2 = parseInt(m[1], 10);
         if (g2 >= 0 && g2 <= 12) return g2;
     }
+
+    // When a form contains only the official section name, infer its grade
+    // from the approved roster before using the generic JHS/SHS folder name.
+    var sectionKey = evalSectionKey(section);
+    if (sectionKey && typeof EVAL_SECTION_ROSTER !== 'undefined') {
+        for (var grade in EVAL_SECTION_ROSTER) {
+            if (!EVAL_SECTION_ROSTER.hasOwnProperty(grade)) continue;
+            var list = EVAL_SECTION_ROSTER[grade] || [];
+            for (var i = 0; i < list.length; i++) {
+                var rosterKey = evalSectionKey(list[i]);
+                if (sectionKey === rosterKey || sectionKey.indexOf(rosterKey) >= 0 || rosterKey.indexOf(sectionKey) >= 0) return Number(grade);
+            }
+        }
+    }
+
+    if (/senior\s*high|\bshs\b/.test(low)) return 11;
+    if (/junior\s*high|\bjhs\b/.test(low)) return 7;
     return null;
 }
 
