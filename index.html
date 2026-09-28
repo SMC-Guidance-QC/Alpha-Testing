@@ -6,24 +6,24 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://script.google.com https://script.googleusercontent.com; frame-src 'self' blob: https://docs.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <title>Stella Maris College — Guidance Center</title>
 <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
-<link rel="stylesheet" href="css/eval-export.css">
-<link rel="stylesheet" href="css/k2manual.css">
-<link rel="stylesheet" href="css/evalhub.css">
+<link rel="stylesheet" href="css/eval-export.css?v=20260928r11">
+<link rel="stylesheet" href="css/k2manual.css?v=20260928r11">
+<link rel="stylesheet" href="css/evalhub.css?v=20260928r11">
 <link rel="shortcut icon" href="assets/favicon.ico">
 <link rel="apple-touch-icon" href="assets/favicon.ico">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css">
-<link rel="stylesheet" href="css/eval-built.css">
-<link rel="stylesheet" href="css/drive-folder.css">
-<link rel="stylesheet" href="css/classlists.css">
-<link rel="stylesheet" href="css/chat.css">
-<link rel="stylesheet" href="css/pro-ui.css">
-<link rel="stylesheet" href="css/topbar-only.css">
-<link rel="stylesheet" href="css/themes.css">
-<script src="js/theme-init.js"></script>
+<link rel="stylesheet" href="css/styles.css?v=20260928r11">
+<link rel="stylesheet" href="css/eval-built.css?v=20260928r11">
+<link rel="stylesheet" href="css/drive-folder.css?v=20260928r11">
+<link rel="stylesheet" href="css/classlists.css?v=20260928r11">
+<link rel="stylesheet" href="css/chat.css?v=20260928r11">
+<link rel="stylesheet" href="css/pro-ui.css?v=20260928r11">
+<link rel="stylesheet" href="css/topbar-only.css?v=20260928r11">
+<link rel="stylesheet" href="css/themes.css?v=20260928r11">
+<script src="js/theme-init.js?v=20260928r11"></script>
 <meta name="theme-color" content="#002B6B">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -455,14 +455,13 @@ Save PDF</button>
 <div class="wni-ov" id="wnIntro" aria-hidden="true">
 <div class="wni-box wni-major" role="dialog" aria-modal="true" aria-labelledby="wniTitle">
 <button class="tour-x" id="wnIntroX" type="button" aria-label="Close">&times;</button>
-<div class="wni-badge" aria-hidden="true">WELCOME</div>
 <p class="wni-kicker">Welcome to SMC Guidance</p>
 <h2 class="wni-title" id="wniTitle">We’re glad you’re here</h2>
 <p class="wni-sub">Your Guidance workspace is ready. Take a short guided tour to discover the tools, themes, and improvements prepared for you.</p>
-<div class="wni-alpha" role="note" aria-label="Alpha testing notice"><span class="wni-alpha-tag">Alpha testing</span><div><strong>Testing since June 17, 2026</strong><span>This website has been in alpha testing since it was first deployed. Features may continue to change while the Guidance Office tests and improves the system.</span></div></div>
+<div class="wni-alpha" role="note" aria-label="Alpha testing notice"><span class="wni-alpha-tag">Alpha testing</span><div><strong>Testing since June 17, 2026</strong><span>This website is currently in alpha testing. This update continues the testing that began on June 17, 2026. Features may continue to change while the Guidance Office tests and improves the system.</span></div></div>
 <div class="wni-theme-preview" aria-hidden="true"><span class="wni-swatch navy"></span><span class="wni-swatch walnut"></span><span class="wni-swatch cream"></span><span class="wni-swatch sage"></span><span class="wni-swatch sakura"></span></div>
 <ul class="wni-list">
-<li><span class="wni-ic">1</span><div><strong>Five selectable themes</strong><span>Choose Wood &amp; Navy, Classic Light, Midnight Navy, Calm Sage, or Sakura from Settings.</span></div></li>
+<li><span class="wni-ic">1</span><div><strong>Five selectable themes</strong><span>Choose Wood &amp; Navy, Classic Light, Classic Dark, Calm Sage, or Sakura from Settings.</span></div></li>
 <li><span class="wni-ic">2</span><div><strong>Teachers Evaluation tab</strong><span>Explore online workbooks, generated evaluations grouped by teacher, and the complete Kinder–Grade 2 paper workflow.</span></div></li>
 </ul>
 <div class="wni-ft">
@@ -498,7 +497,7 @@ Save PDF</button>
 <div class="theme-grid" id="themeChoices" role="radiogroup" aria-label="Website theme">
 <button class="theme-card" id="themeWood" type="button" role="radio" aria-checked="false" data-theme-choice="wood"><span class="theme-preview tp-wood"><i></i><i></i><i></i></span><span class="theme-card-copy"><strong>Wood &amp; Navy</strong><small>Warm, focused default</small></span><span class="theme-check" aria-hidden="true">✓</span></button>
 <button class="theme-card" type="button" role="radio" aria-checked="false" data-theme-choice="light"><span class="theme-preview tp-light"><i></i><i></i><i></i></span><span class="theme-card-copy"><strong>Classic Light</strong><small>Clean and familiar</small></span><span class="theme-check" aria-hidden="true">✓</span></button>
-<button class="theme-card" type="button" role="radio" aria-checked="false" data-theme-choice="dark"><span class="theme-preview tp-dark"><i></i><i></i><i></i></span><span class="theme-card-copy"><strong>Midnight Navy</strong><small>Low-light comfort</small></span><span class="theme-check" aria-hidden="true">✓</span></button>
+<button class="theme-card" type="button" role="radio" aria-checked="false" data-theme-choice="dark"><span class="theme-preview tp-dark"><i></i><i></i><i></i></span><span class="theme-card-copy"><strong>Classic Dark</strong><small>Dark mode for Classic Light</small></span><span class="theme-check" aria-hidden="true">✓</span></button>
 <button class="theme-card" type="button" role="radio" aria-checked="false" data-theme-choice="sage"><span class="theme-preview tp-sage"><i></i><i></i><i></i></span><span class="theme-card-copy"><strong>Calm Sage</strong><small>Soft and restorative</small></span><span class="theme-check" aria-hidden="true">✓</span></button>
 <button class="theme-card" type="button" role="radio" aria-checked="false" data-theme-choice="sakura"><span class="theme-preview tp-sakura"><i></i><i></i><i></i></span><span class="theme-card-copy"><strong>Sakura</strong><small>Soft blush and plum</small></span><span class="theme-check" aria-hidden="true">✓</span></button>
 </div>
@@ -551,27 +550,27 @@ Save PDF</button>
 <p class="lock-hint"><span id="tfaResend" class="tfa-link">Resend code</span> &middot; <span id="tfaCancel" class="tfa-link">Cancel</span></p>
 </div>
 </div>
-<script src="js/config.js"></script>
-<script src="js/ui.js"></script>
-<script src="js/api.js"></script>
-<script src="js/auth.js"></script>
-<script src="js/charts.js"></script>
-<script src="js/export.js"></script>
-<script src="js/records.js"></script>
-<script src="js/procedures.js"></script>
-<script src="js/evalhub.js"></script>
-<script src="js/evalexport.js"></script>
-<script src="js/k2manual.js"></script>
-<script src="js/profile.js"></script>
-<script src="js/settings.js"></script>
-<script src="js/incidents.js"></script>
-<script src="js/classlists.js"></script>
-<script src="js/routine.js"></script>
-<script src="js/schedule.js"></script>
-<script src="js/cmd.js"></script>
-<script src="js/chat.js"></script>
-<script src="js/app.js"></script>
-<script src="js/pwa.js"></script>
+<script src="js/config.js?v=20260928r11"></script>
+<script src="js/ui.js?v=20260928r11"></script>
+<script src="js/api.js?v=20260928r11"></script>
+<script src="js/auth.js?v=20260928r11"></script>
+<script src="js/charts.js?v=20260928r11"></script>
+<script src="js/export.js?v=20260928r11"></script>
+<script src="js/records.js?v=20260928r11"></script>
+<script src="js/procedures.js?v=20260928r11"></script>
+<script src="js/evalhub.js?v=20260928r11"></script>
+<script src="js/evalexport.js?v=20260928r11"></script>
+<script src="js/k2manual.js?v=20260928r11"></script>
+<script src="js/profile.js?v=20260928r11"></script>
+<script src="js/settings.js?v=20260928r11"></script>
+<script src="js/incidents.js?v=20260928r11"></script>
+<script src="js/classlists.js?v=20260928r11"></script>
+<script src="js/routine.js?v=20260928r11"></script>
+<script src="js/schedule.js?v=20260928r11"></script>
+<script src="js/cmd.js?v=20260928r11"></script>
+<script src="js/chat.js?v=20260928r11"></script>
+<script src="js/app.js?v=20260928r11"></script>
+<script src="js/pwa.js?v=20260928r11"></script>
 
 </body>
 </html>

@@ -86,11 +86,11 @@ SMC.app = (function () {
             void activeView.offsetWidth;
             activeView.classList.add('smc-view-enter');
             clearTimeout(activeView.__smcEnterTimer);
-            activeView.__smcEnterTimer = setTimeout(function () { activeView.classList.remove('smc-view-enter'); }, 520);
+            activeView.__smcEnterTimer = setTimeout(function () { activeView.classList.remove('smc-view-enter'); }, 700);
         }
         if (nav) {
             nav.classList.remove('smc-nav-pop'); void nav.offsetWidth; nav.classList.add('smc-nav-pop');
-            clearTimeout(nav.__smcPopTimer); nav.__smcPopTimer = setTimeout(function () { nav.classList.remove('smc-nav-pop'); }, 420);
+            clearTimeout(nav.__smcPopTimer); nav.__smcPopTimer = setTimeout(function () { nav.classList.remove('smc-nav-pop'); }, 600);
         }
         if (locked && isAdminUser())
             showAdminBanner();
@@ -445,7 +445,7 @@ SMC.app = (function () {
                 sp.textContent = d ? 'Light mode' : 'Dark mode'; tb.setAttribute('aria-pressed', d ? 'true' : 'false'); }
             sync();
             tb.addEventListener('click', function () { var d = document.documentElement.getAttribute('data-theme') === 'dark'; if (d) {
-                document.documentElement.removeAttribute('data-theme');
+                document.documentElement.setAttribute('data-theme', 'light');
             }
             else {
                 document.documentElement.setAttribute('data-theme', 'dark');
@@ -569,7 +569,7 @@ SMC.app = (function () {
         inp.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
         document.addEventListener('click', function (e) { if (e.target !== inp && !box.contains(e.target)) close(); });
     }
-    var wnOpen = null, wnIntroOpen = null, tourSeenKey = 'smc-design-tour-required-2026-09-r4-welcome-animations', tourRequired = false;
+    var wnOpen = null, wnIntroOpen = null, tourSeenKey = 'smc-design-tour-required-2026-09-r10-profile-no-bounce', tourRequired = false;
     function setupWhatsNew() {
         var ov = document.getElementById('tour');
         var intro = document.getElementById('wnIntro');
@@ -596,9 +596,9 @@ SMC.app = (function () {
             { sel: '.k2-common', ic: '10', t: 'Enter the shared batch details', d: 'Type the teacher as SURNAME, FIRST NAME, then enter the subject and numeric school year. These details apply to every staged paper.', view: 'evaluations', evalTool: 'k2' },
             { sel: '.k2-paper-fields', ic: '11', t: 'Encode each answered paper', d: 'Enter the optional class number, student name, grade level, ratings, and comment exactly as written on the paper form.', view: 'evaluations', evalTool: 'k2' },
             { sel: '#k2Batch', ic: '12', t: 'Save and create the outputs', d: 'Add papers to the batch, save the complete batch, preview the compiled PDF, and build the result template.', view: 'evaluations', evalTool: 'k2' },
-            { sel: '#profileBtn', ic: '13', t: 'Personalise the website', d: 'Open your profile menu to reach Settings and the appearance controls.', nav: true },
-            { sel: '#pmSettings', ic: '14', t: 'Open Settings', d: 'Choose Settings from the profile menu whenever you want to change the website theme.', profile: true, nav: true },
-            { sel: '#themeWood', ic: '15', t: 'Choose a theme', d: 'Select Wood & Navy, Classic Light, Midnight Navy, Calm Sage, or Sakura. Your choice is saved on this device.', settings: true },
+            { sel: '#profileBtn', ic: '13', t: 'Personalise the website', d: 'The user dropdown opens automatically here so you can find Settings and the appearance controls.', profile: true, nav: true },
+            { sel: '#pmSettings', ic: '14', t: 'Open Settings', d: 'The profile menu opens automatically here so you can see where Settings is located.', profile: true, nav: true },
+            { sel: '#themeWood', ic: '15', t: 'Choose a theme', d: 'Settings opens automatically here. Select Wood & Navy, Classic Light, Classic Dark, Calm Sage, or Sakura. Your choice and animation preference are saved on this device.', settings: true },
             { sel: null, ic: '16', t: 'Tour complete', d: 'You have now seen every Teachers Evaluation tool and the theme controls. You can replay this tour from Settings.' }
         ];
         var i = 0;
@@ -659,14 +659,14 @@ SMC.app = (function () {
         function render() { prepare(steps[i]); setTimeout(place, steps[i].settings || steps[i].profile || steps[i].view || steps[i].evalTool ? 240 : 30); }
         function closeTour(completed) {
             if (tourRequired && !completed) return;
-            ov.classList.remove('on'); ov.setAttribute('aria-hidden', 'true'); closeProfile();
+            ov.classList.remove('on'); ov.setAttribute('aria-hidden', 'true'); document.documentElement.classList.remove('smc-tour-running'); closeProfile();
             var sm = document.getElementById('settingsModal'); if (sm && sm.classList.contains('on') && SMC.settings && SMC.settings.close) SMC.settings.close();
             markSeen(); window.removeEventListener('resize', place); window.removeEventListener('scroll', place, true);
         }
-        back.addEventListener('click', function () { if (i > 0) { i--; render(); } });
-        next.addEventListener('click', function () { if (i < steps.length - 1) { i++; render(); } else closeTour(true); });
+        back.addEventListener('click', function (e) { e.stopPropagation(); if (i > 0) { i--; render(); } });
+        next.addEventListener('click', function (e) { e.stopPropagation(); if (i < steps.length - 1) { i++; render(); } else closeTour(true); });
         if (xB) xB.addEventListener('click', function () { closeTour(false); });
-        wnOpen = function (required) { tourRequired = !!required; ov.classList.toggle('required', tourRequired); if (xB) xB.hidden = tourRequired; i = 0; ov.classList.add('on'); ov.setAttribute('aria-hidden', 'false'); render(); window.addEventListener('resize', place); window.addEventListener('scroll', place, true); };
+        wnOpen = function (required) { tourRequired = !!required; ov.classList.toggle('required', tourRequired); if (xB) xB.hidden = tourRequired; i = 0; document.documentElement.classList.add('smc-tour-running'); ov.classList.add('on'); ov.setAttribute('aria-hidden', 'false'); render(); window.addEventListener('resize', place); window.addEventListener('scroll', place, true); };
         function closeIntro(seen) { if (tourRequired && seen) return; intro.classList.remove('on'); intro.setAttribute('aria-hidden', 'true'); if (seen) markSeen(); }
         wnIntroOpen = function (required) { tourRequired = !!required; intro.classList.toggle('required', tourRequired); if (introX) introX.hidden = tourRequired; if (introSkip) introSkip.hidden = tourRequired; if (introStart) introStart.textContent = tourRequired ? 'Continue to required tour' : 'Show me around'; intro.classList.add('on'); intro.setAttribute('aria-hidden', 'false'); };
         var introX = document.getElementById('wnIntroX');
@@ -678,7 +678,7 @@ SMC.app = (function () {
         intro.addEventListener('click', function (e) { if (e.target === intro && !tourRequired) closeIntro(true); });
     }
     function maybeShowWhatsNew() {
-        var key = 'smc-design-tour-required-2026-09-r4-welcome-animations';
+        var key = 'smc-design-tour-required-2026-09-r10-profile-no-bounce';
         try { if (user && user.username) key += '-' + String(user.username).toLowerCase(); } catch (e) {}
         tourSeenKey = key;
         try { if (localStorage.getItem(key)) return; } catch (e) {}

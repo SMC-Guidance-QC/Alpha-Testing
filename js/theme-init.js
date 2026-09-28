@@ -1,6 +1,6 @@
 "use strict";
 (function(){
-  var theme="wood";
+  var theme="light";
   try {
     var saved=localStorage.getItem("smc-theme");
     if (saved === "dark" || saved === "light" || saved === "wood" || saved === "sage" || saved === "sakura") theme=saved;

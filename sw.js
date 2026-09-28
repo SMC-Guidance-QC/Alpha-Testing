@@ -1,6 +1,6 @@
 /* SMC Guidance Center - service worker (PWA app shell) */
 "use strict";
-var CACHE = 'smc-alpha-tab-button-motion-20260928';
+var CACHE = 'smc-alpha-static-session-gradient-20260928r11';
 var CORE = [
   './',
   './index.html',
@@ -82,7 +82,7 @@ self.addEventListener('fetch', function (e) {
   // Navigation requests: network-first, fall back to cached index for offline.
   if (req.mode === 'navigate') {
     e.respondWith(
-      fetch(req).then(function (res) {
+      fetch(req, { cache: 'no-store' }).then(function (res) {
         var copy = res.clone();
         caches.open(CACHE).then(function (c) { c.put(req, copy); });
         return res;
@@ -95,7 +95,7 @@ self.addEventListener('fetch', function (e) {
 
   // Never hide code/configuration fixes behind an old cached script.
   if (/\.(?:js|css)$/.test(url.pathname)) {
-    e.respondWith(fetch(req).then(function (res) {
+    e.respondWith(fetch(req, { cache: 'no-store' }).then(function (res) {
       if (res && res.status === 200 && res.type === 'basic') {
         var copy = res.clone();
         caches.open(CACHE).then(function (c) { c.put(req, copy); });
@@ -108,7 +108,7 @@ self.addEventListener('fetch', function (e) {
   e.respondWith(
     caches.match(req).then(function (cached) {
       if (cached) return cached;
-      return fetch(req).then(function (res) {
+      return fetch(req, { cache: 'no-store' }).then(function (res) {
         if (res && res.status === 200 && res.type === 'basic') {
           var copy = res.clone();
           caches.open(CACHE).then(function (c) { c.put(req, copy); });

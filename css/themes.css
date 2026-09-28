@@ -1,4 +1,4 @@
-/* Major appearance update: selectable themes and Wood & Navy default. */
+/* Major appearance update: selectable themes and Classic Light default. */
 :root[data-theme="wood"]{
   --ink:#17263a;--navy:#0b3159;--navy2:#174d78;--gold:#9a6a3a;--gold2:#d5b17a;
   --cream:#f3efe7;--paper:#fffdf9;--smoke:#ece6dc;--line:#d9cfc0;--mist:#6f7a86;
@@ -113,7 +113,7 @@ html,body,button,input,select,textarea{font-family:'Outfit',system-ui,-apple-sys
 .eval-hub-hero{background:linear-gradient(135deg,var(--paper) 0%,var(--smoke) 100%);border-color:var(--line)}
 .eval-workspace-bar{background:color-mix(in srgb,var(--paper) 94%,transparent);border-color:var(--line)}
 
-/* Midnight Navy: lighter text and distinct interactive layers prevent color collisions. */
+/* Classic Dark: lighter text and distinct interactive layers prevent color collisions. */
 :root[data-theme="dark"] body,:root[data-theme="dark"] #appScreen{color:var(--ink)}
 :root[data-theme="dark"] .topbar-left h2,:root[data-theme="dark"] .ph-t,:root[data-theme="dark"] .scval,:root[data-theme="dark"] .set-sec h3,:root[data-theme="dark"] .set-row strong,:root[data-theme="dark"] .set-update-row strong,:root[data-theme="dark"] .theme-card-copy strong,:root[data-theme="dark"] .wni-list li strong,:root[data-theme="dark"] .tour-d,:root[data-theme="dark"] .cl-nm,:root[data-theme="dark"] .cl-card-sec{color:#f4f7ff!important}
 :root[data-theme="dark"] .topbar-left p,:root[data-theme="dark"] .sclabel,:root[data-theme="dark"] .scsub,:root[data-theme="dark"] .set-hint,:root[data-theme="dark"] .theme-card-copy small,:root[data-theme="dark"] .set-update-row span,:root[data-theme="dark"] .wni-sub,:root[data-theme="dark"] .wni-list li div span,:root[data-theme="dark"] .cl-head-s,:root[data-theme="dark"] .cl-card-adv{color:#becbe0!important;opacity:1}
@@ -320,3 +320,44 @@ html:not([data-animations="off"]) .eval-panel:not([hidden]),
 html:not([data-animations="off"]) [role="tabpanel"]:not([hidden]){animation:smcInnerPanel .32s ease-out both}
 @keyframes smcInnerPanel{from{opacity:.2;transform:translateX(10px)}to{opacity:1;transform:translateX(0)}}
 @media(prefers-reduced-motion:reduce){.ri-tab.on,.k2-tabs button.on,.eval-tool-switch.on,[role="tab"][aria-selected="true"],.eval-panel:not([hidden]),[role="tabpanel"]:not([hidden]){animation:none!important}}
+
+/* R7 — Classic Dark is the dark counterpart of Classic Light. */
+:root[data-theme="dark"]{--ink:#e8eef7;--navy:#78b7f0;--navy2:#9bcbf5;--gold:#d8bd70;--gold2:#ead99f;--cream:#10151d;--paper:#171e28;--smoke:#202a36;--line:#344252;--mist:#a8b6c8;--red:#ff8f8f;--teal:#62c7ba;--sh:0 2px 14px rgba(0,0,0,.38);--shm:0 10px 32px rgba(0,0,0,.5)}
+:root[data-theme="dark"] body,:root[data-theme="dark"] #appScreen{background:#10151d}
+:root[data-theme="dark"] #appScreen .sb{background:rgba(19,27,37,.98);border-color:#344252}
+:root[data-theme="dark"] #appScreen .sbi{color:#b7c4d3}:root[data-theme="dark"] #appScreen .sbi:hover{background:#253344;color:#fff}:root[data-theme="dark"] #appScreen .sbi.on{background:#dcecff;color:#163f68}:root[data-theme="dark"] #appScreen .sbi.on::after{background:#78b7f0}
+:root[data-theme="dark"] .gform-cta{background:linear-gradient(112deg,#163b60 0%,#235f92 55%,#347daf 100%)}
+.tp-dark{background:#171e28;color:#78b7f0}.tp-dark::before{background:#10151d;border-right:1px solid #344252}.tp-dark i{background:#9bcbf5}
+
+/* R7 — unmistakable main-tab and selected-navigation transitions. */
+html:not([data-animations="off"]) #appScreen .smc-view-enter{animation:smcViewEnterStrong .62s cubic-bezier(.16,.8,.2,1) both!important;transform-origin:50% 0}
+html:not([data-animations="off"]) #appScreen .smc-nav-pop svg{animation:smcNavPopStrong .52s cubic-bezier(.18,.9,.2,1.25)!important}
+html:not([data-animations="off"]) #appScreen .sbi.on,html:not([data-animations="off"]) #appScreen .sbsubi.on{animation:smcTabSelectStrong .48s ease-out!important}
+html:not([data-animations="off"]) .eval-panel:not([hidden]),html:not([data-animations="off"]) [role="tabpanel"]:not([hidden]){animation:smcInnerStrong .44s ease-out both!important}
+@keyframes smcViewEnterStrong{0%{opacity:0;transform:translate3d(0,34px,0) scale(.965);filter:blur(5px)}55%{opacity:.88;filter:blur(0)}100%{opacity:1;transform:translate3d(0,0,0) scale(1);filter:blur(0)}}
+@keyframes smcNavPopStrong{0%{transform:scale(.5) rotate(-12deg);opacity:.25}65%{transform:scale(1.22) rotate(4deg);opacity:1}100%{transform:scale(1) rotate(0)}}
+@keyframes smcTabSelectStrong{0%{transform:scale(.89)}60%{transform:scale(1.055)}100%{transform:scale(1)}}
+@keyframes smcInnerStrong{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+@media(prefers-reduced-motion:reduce){#appScreen .smc-view-enter,#appScreen .smc-nav-pop svg,#appScreen .sbi.on,#appScreen .sbsubi.on,.eval-panel:not([hidden]),[role="tabpanel"]:not([hidden]){animation:none!important;filter:none!important}}
+
+/* R9 — the evaluation toolbar scrolls away with the page instead of sticking. */
+.eval-workspace-bar{position:relative!important;top:auto!important}
+
+/* R9 — show the complete K2 paper and use normal page scrolling, not a cut-off inner pane. */
+.k2-entry-main{max-height:none!important;overflow:visible!important;scrollbar-gutter:auto!important;padding-bottom:24px!important}
+.k2-entry-side{max-height:none!important;overflow:visible!important}
+.k2-entry-main .k2-paper{min-height:max-content}
+
+/* R9 — guided tour movement is intentionally disabled. */
+.tour-hole,.tour-pop{transition:none!important}
+html.smc-tour-running .tour-ov,html.smc-tour-running .tour-ov *{animation:none!important;transition:none!important}
+html.smc-tour-running .smc-view-enter,html.smc-tour-running .smc-nav-pop svg,html.smc-tour-running .sbi.on,html.smc-tour-running .sbsubi.on,html.smc-tour-running .eval-panel:not([hidden]){animation:none!important;transition:none!important;filter:none!important}
+
+/* R10 — remove pop/bounce effects from navigation and internal tabs. */
+html:not([data-animations="off"]) #appScreen .smc-nav-pop svg,
+html:not([data-animations="off"]) #appScreen .sbi.on,
+html:not([data-animations="off"]) #appScreen .sbsubi.on,
+html:not([data-animations="off"]) .ri-tab.on,
+html:not([data-animations="off"]) .k2-tabs button.on,
+html:not([data-animations="off"]) .eval-tool-switch.on,
+html:not([data-animations="off"]) [role="tab"][aria-selected="true"]{animation:none!important}

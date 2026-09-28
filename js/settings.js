@@ -11,15 +11,15 @@ SMC.settings = (function () {
     function isAdmin() { return !!(user && user.role === 'admin'); }
     var THEMES = ['wood', 'light', 'dark', 'sage', 'sakura'];
     function getTheme() {
-        var t = document.documentElement.getAttribute('data-theme') || 'wood';
-        return THEMES.indexOf(t) >= 0 ? t : 'wood';
+        var t = document.documentElement.getAttribute('data-theme') || 'light';
+        return THEMES.indexOf(t) >= 0 ? t : 'light';
     }
     function applyTheme(theme) {
-        if (THEMES.indexOf(theme) < 0) theme = 'wood';
+        if (THEMES.indexOf(theme) < 0) theme = 'light';
         document.documentElement.setAttribute('data-theme', theme);
         try { localStorage.setItem(THEME_KEY, theme); } catch (e) {}
         syncThemeUI();
-        toast('Theme changed to ' + ({ wood: 'Wood & Navy', light: 'Classic Light', dark: 'Midnight Navy', sage: 'Calm Sage', sakura: 'Sakura' }[theme]) + '.', 'ok');
+        toast('Theme changed to ' + ({ wood: 'Wood & Navy', light: 'Classic Light', dark: 'Classic Dark', sage: 'Calm Sage', sakura: 'Sakura' }[theme]) + '.', 'ok');
     }
     function animationsOn() { return document.documentElement.getAttribute('data-animations') !== 'off'; }
     function syncAnimationUI() {
